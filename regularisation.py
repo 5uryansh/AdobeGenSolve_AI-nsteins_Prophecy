@@ -2,8 +2,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import find_peaks
-    
-    
+from scipy.optimize import minimize
+   
+
 def read_csv(csv_path):
     np_path_XYs = np.genfromtxt(csv_path, delimiter=',')
     # print(np_path_XYs)
@@ -46,15 +47,62 @@ def part_wise_plot(index, size=4):
     
 
 # code for detection of straight line
-def detect_straight_line(x, y, threshold=1.0):
-    A = np.vstack([x, np.ones(len(x))]).T
-    m, c = np.linalg.lstsq(A, y, rcond=None)[0]
-    y_fit = m * x + c
-    loss = np.mean((y - y_fit) ** 2)
+def calculate_error(params, x, y, vertical=False):
+    if vertical:
+        # If the line is vertical, the error is based on the difference in x-values
+        c = params[0]
+        return np.mean((x - c) ** 2)
+    else:
+        # For non-vertical lines, the error is based on y-values
+        m, c = params
+        y_fit = m * x + c
+        return np.mean((y - y_fit) ** 2)
 
-    if loss<threshold:
-        y=y_fit
-    return loss < threshold, loss, x, y
+
+def detect_straight_line(x, y, threshold=1.0, epsilon=1e-8):
+    delta_x = x[-1] - x[0]
+    delta_y = y[-1] - y[0]
+    
+    if delta_x == 0:
+        delta_x += epsilon
+    
+    m_initial = delta_y / delta_x
+    c_initial = y[0] - m_initial * x[0]
+    
+    if m_initial > 11.4:
+        avg_x = (x[0]+x[-1])/2
+        new_x = []
+        for i in range(0, len(x)):
+            new_x.append(avg_x)
+        
+        new_x = np.array(new_x)
+        loss = np.mean((x-new_x) ** 2)
+        loss = loss ** 0.5
+        return loss<threshold, loss, new_x, y
+
+    # If the slope is very large (close to infinity), we treat it as a vertical line
+    if abs(m_initial) > 1e6:
+        vertical = True
+        result = minimize(calculate_error, [x[0]], args=(x, y, vertical))
+        c_optimized = result.x[0]
+        final_error = calculate_error([c_optimized], x, y, vertical)
+        y_fit = np.full_like(y, c_optimized)  # y-fit doesn't matter in the vertical line case
+        x_fit = np.full_like(x, c_optimized)  # x is constant for the vertical line
+    else:
+        vertical = False
+        result = minimize(calculate_error, [m_initial, c_initial], args=(x, y, vertical))
+        m_optimized, c_optimized = result.x
+        y_fit = m_optimized * x + c_optimized
+        x_fit = x
+        final_error = calculate_error(result.x, x, y, vertical)
+        # print("tumhari maa ka")
+
+    # Calculate the final error (loss)
+    loss = calculate_error(result.x, x, y)
+
+    # Check if the final error is below the threshold'
+    return loss<threshold, loss, x, y_fit
+ 
 
 
 ## Checking for circle and ellipse
