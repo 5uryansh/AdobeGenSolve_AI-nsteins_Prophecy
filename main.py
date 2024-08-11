@@ -24,12 +24,15 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 # parsing
 parser = argparse.ArgumentParser(description="Adobe")
 parser.add_argument('--task', type=str, default='regularisation')
-parser.add_argument('--path', type=str, default='..\\dataset\\frag1.csv')
+parser.add_argument('--path', type=str, default='dataset\\isolated.csv')
 
 
 args = parser.parse_args()
 task = args.task
 path = args.path
+
+outputfile = np.empty((0, 4), dtype=np.float64)
+shape_num = 0
 
 if task=='regularisation':
     paths_XYs = read_csv(path)
@@ -81,6 +84,13 @@ if task=='regularisation':
             # appending the values in final_shapes    
             final_shape = np.column_stack((x, y))
             final_shapes.append([final_shape])
+
+        # print(len(final_shape))
+        zeros_column = np.zeros((len(final_shape), 1), dtype=np.float64)
+        integers_column = np.full((len(final_shape), 1), float(shape_num), dtype=np.float64)
+        shape_num += 1
+        stacked_array = np.hstack((integers_column, zeros_column, np.array(final_shape, dtype=np.float64)))
+        outputfile = np.vstack((outputfile, stacked_array), dtype=np.float64)
 
     # plotting the graph
     plot(final_shapes)  
@@ -162,8 +172,23 @@ if task == 'occlusion':
             final_shape = np.column_stack((completed_curve_x, completed_curve_y))
             final_shapes.append([final_shape])
 
+        # print(final_shapes.shape)
+        zeros_column = np.zeros((len(final_shape), 1), dtype=np.float64)
+        integers_column = np.full((len(final_shape), 1), float(shape_num), dtype=np.float64)
+        shape_num += 1
+        stacked_array = np.hstack((integers_column, zeros_column, np.array(final_shape, dtype=np.float64)))
+        outputfile = np.vstack((outputfile, stacked_array), dtype=np.float64)
     # plotting the graph
-    plot(final_shapes) 
+    plot(final_shapes)
+
+    
 
     from evaluation import polylines2svg
     polylines2svg(final_shapes, "output.svg")
+
+csv_file_path = 'output\\outputfile.csv'  
+np.savetxt(csv_file_path, outputfile, delimiter=',', fmt='%f', comments='')
+
+print(f"Output file saved as {csv_file_path}")
+path_out = read_csv(csv_file_path)
+plot(path_out)
