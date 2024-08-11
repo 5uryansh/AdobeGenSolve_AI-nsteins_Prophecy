@@ -7,6 +7,7 @@ from regularisation import detect_regular_polygon
 
 import numpy as np
 import matplotlib.pyplot as plt
+from colorama import Fore, Style
 
 from occlusion import reflect_curve
 from occlusion import calculate_symmetry_score
@@ -44,38 +45,37 @@ if task=='regularisation':
             x = XYs[:, 0]
             y = XYs[:, 1]
             range_val = max(np.ptp(x), np.ptp(y))
-            print(f"Currently values range is {range_val}")
             
             if(detect_straight_line(x, y, threshold=0.1*range_val)[0]==True):
-                print("The file contain a straight line!!")
+                print(Fore.GREEN, "The file contain a straight line!!")
                 value = detect_straight_line(x, y, threshold=0.1*range_val)
                 loss = value[1]
                 x = value[2]
                 y = value[3]
             
             elif(detect_circle_or_ellipse(x, y, threshold=0.1*range_val)[0]==True):
-                print("The file contains an ellipse!!")
+                print(Fore.GREEN, "The file contains an ellipse!!")
                 value = detect_circle_or_ellipse(x, y, threshold=0.1*range_val)
                 loss = value[1]
                 x = value[2]
                 y = value[3]
             
             elif(detect_rectangle(x, y, threshold=0.6*range_val, tolerance=0.1*range_val)[0]==True):
-                print("The file contains a rectangle!!")
+                print(Fore.GREEN, "The file contains a rectangle!!")
                 value = detect_rectangle(x, y, threshold=0.6*range_val, tolerance=0.1*range_val)
                 loss = value[1]
                 x = value[2]
                 y = value[3]
 
             elif(detect_star_shape(x, y, threshold=0.1*range_val)[0]==True):
-                print("The file contains a star!!")
+                print(Fore.GREEN, "The file contains a star!!")
                 value = detect_star_shape(x, y, threshold=0.1*range_val)
                 loss = value[1]
                 x = value[2]
                 y = value[3]
 
             elif(detect_regular_polygon(x, y, threshold=1000)[0]==True):
-                print("The file contains a regular polygon!!")
+                print(Fore.GREEN, "The file contains a regular polygon!!")
                 value = detect_regular_polygon(x, y, threshold=1000)
                 loss = value[1]
                 x = value[2]
@@ -189,6 +189,5 @@ if task == 'occlusion':
 csv_file_path = 'output\\outputfile.csv'  
 np.savetxt(csv_file_path, outputfile, delimiter=',', fmt='%f', comments='')
 
-print(f"Output file saved as {csv_file_path}")
-path_out = read_csv(csv_file_path)
-plot(path_out)
+print(Fore.RED, f"Output file saved as {csv_file_path}")
+print(Style.RESET_ALL)
