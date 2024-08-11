@@ -7,7 +7,6 @@ from scipy.spatial.distance import euclidean
 
 def read_csv(csv_path):
     np_path_XYs = np.genfromtxt(csv_path, delimiter=',')
-    # print(np_path_XYs)
     path_XYs = []
     for i in np.unique(np_path_XYs[:, 0]):
         npXYs = np_path_XYs[np_path_XYs[:, 0] == i][:, 1:]
@@ -16,7 +15,6 @@ def read_csv(csv_path):
             XY = npXYs[npXYs[:, 0] == j][:, 1:]
             XYs.append(XY)
         path_XYs.append(XYs)
-        # print(f"\n\n\n\n{path_XYs}")
     return path_XYs
 
 

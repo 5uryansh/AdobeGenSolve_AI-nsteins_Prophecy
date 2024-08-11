@@ -155,7 +155,7 @@ if task == 'occlusion':
             right_gaps, right_derivs = check_continuity_and_derivatives(right_side)
             
             # Deciding which side is occluded
-            if len(left_gaps) > len(right_gaps) or len(left_derivs) > len(right_derivs):
+            if len(left_gaps) < len(right_gaps) or len(left_derivs) < len(right_derivs):
                 occluded_side = left_side
                 non_occluded_side = right_side
             else:

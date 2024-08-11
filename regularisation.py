@@ -16,7 +16,6 @@ def read_csv(csv_path):
             XY = npXYs[npXYs[:, 0] == j][:, 1:]
             XYs.append(XY)
         path_XYs.append(XYs)
-        # print(f"\n\n\n\n{path_XYs}")
     return path_XYs
 
 
@@ -35,7 +34,6 @@ def part_wise_plot(index, size=4):
     index = np.array(index).squeeze()
     x = index[:, 0]
     y = index[:, 1]
-    # print(f"the x coordinates are:{x} \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n the y coordinates are: {y}")
     
     # Plotting the points
     plt.figure(figsize=(size, size))
@@ -46,7 +44,7 @@ def part_wise_plot(index, size=4):
     plt.show()
     
 
-# code for detection of straight line
+# Code for error calculation
 def calculate_error(params, x, y, vertical=False):
     if vertical:
         # If the line is vertical, the error is based on the difference in x-values
@@ -58,7 +56,7 @@ def calculate_error(params, x, y, vertical=False):
         y_fit = m * x + c
         return np.mean((y - y_fit) ** 2)
 
-
+# code for detection of straight line
 def detect_straight_line(x, y, threshold=1.0, epsilon=1e-8):
     delta_x = x[-1] - x[0]
     delta_y = y[-1] - y[0]
@@ -95,7 +93,6 @@ def detect_straight_line(x, y, threshold=1.0, epsilon=1e-8):
         y_fit = m_optimized * x + c_optimized
         x_fit = x
         final_error = calculate_error(result.x, x, y, vertical)
-        # print("tumhari maa ka")
 
     # Calculate the final error (loss)
     loss = calculate_error(result.x, x, y)
@@ -120,7 +117,7 @@ def detect_circle_or_ellipse(x, y, threshold=9.0):
     return loss < threshold, loss, x, y
 
 
-
+## Checking for local maximas
 def find_maximums(nums):
     n = len(nums)
     local_maximas = []
@@ -136,7 +133,7 @@ def find_maximums(nums):
 
     return local_maximas
 
-
+## Checking for local minimas
 def find_minimas(nums):
     n = len(nums)
     local_minimas = []
@@ -258,7 +255,8 @@ def detect_star_shape(x, y, threshold=2.0):
                         if dist < min_dist:
                             min_dist = dist
                             next_index = trough_index
-            else:  # If current point is a trough
+            # If current point is a trough
+            else:
                 min_dist = float('inf')
                 next_index = current_index
                 for peak_index in sorted_combined:
