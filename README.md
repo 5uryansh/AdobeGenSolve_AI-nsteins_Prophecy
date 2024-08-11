@@ -23,6 +23,12 @@ For example:
 ```
 python main.py --task regularisation --path dataset\isolated.csv
 ```
+```
+python main.py --task fragmented --path dataset\frag1.csv
+```
+```
+python main.py --task occlusion --path dataset\occlusion1.csv
+```
 
 #### Step 3
 The resulting file is in `.csv` format stored at `output\outputfile.csv`.
