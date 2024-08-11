@@ -11,6 +11,10 @@ What it does:
 
 After taking the input, the program plots the output .csv file using Matplotlib and stores the output file in the output folder.
 
+**Since sufficient data was not provided, the code runs on threshold values to identify shapes and regularise them. This threshold value may be modified for different test cases to obtain accurate results.**
+
+SCOPE: This threshold value calculation may be automated using machine learning in the future.
+
 #### Step 1
 ```
 pip install -r requirements.txt
@@ -29,6 +33,8 @@ python main.py --task fragmented --path dataset\frag1.csv
 ```
 python main.py --task occlusion --path dataset\occlusion1.csv
 ```
+
+**Note**: For regularisation problems that contain fragmented polylines, please use `--task fragmented`
 
 #### Step 3
 The resulting file is in `.csv` format stored at `output\outputfile.csv`.
