@@ -16,6 +16,16 @@ from occlusion import mirror_points
 from occlusion import find_intersections
 from occlusion import shift_symmetry_line
 
+from fragmented import update_frag_with_segments
+from fragmented import process_segments
+from fragmented import angle_based_line_check
+from fragmented import process_and_merge_segments_with_graph
+from fragmented import find_cycles_in_graph
+from fragmented import process_and_merge_corners
+from fragmented import find_all_cycle_combinations
+from fragmented import seperate_cycles
+from fragmented import defaultdict
+
 import argparse
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -39,7 +49,6 @@ print(Style.RESET_ALL)
 
 if task=='regularisation':
     paths_XYs = read_csv(path)
-    plot(paths_XYs, "Original Figure")
     final_shapes = []
     for XYs in paths_XYs:
         for XY in XYs:
@@ -131,8 +140,6 @@ if task=='regularisation':
     
 if task == 'occlusion':
     paths_XYs = read_csv(path)
-    paths_XYs = read_csv(path)
-    plot(paths_XYs, "original")
     final_shapes = []
     for XYs in paths_XYs:
         for XY in XYs:
@@ -214,19 +221,74 @@ if task == 'occlusion':
             final_shape = np.column_stack((completed_curve_x, completed_curve_y))
             final_shapes.append([final_shape])
 
-        # print(final_shapes.shape)
+            zeros_column = np.zeros((len(final_shape), 1), dtype=np.float64)
+            integers_column = np.full((len(final_shape), 1), float(shape_num), dtype=np.float64)
+            shape_num = shape_num + 1
+            stacked_array = np.hstack((integers_column, zeros_column, np.array(final_shape, dtype=np.float64)))
+            outputfile = np.vstack((outputfile, stacked_array), dtype=np.float64)
+
+
+
+if task == 'fragmented':
+    isolated = read_csv(path)
+    newfrag = update_frag_with_segments(isolated, curvature_threshold=0.2)
+    new_frag_with_lines = process_segments(newfrag)
+    is_straight_line = [angle_based_line_check(segment[0], 0.1, 0.1) for segment in newfrag]
+    # Process the new fragments to merge and convert to straight lines where applicable
+    merged_frag_with_lines = process_and_merge_segments_with_graph(new_frag_with_lines, is_straight_line)
+    # Process and merge corners
+    merged_frag_with_lines = process_and_merge_corners(merged_frag_with_lines, is_straight_line)
+
+    # Step 1: Maintain a map for all the segments between two coordinate points.
+    segment_map = defaultdict(list)
+    for idx, segment in enumerate(merged_frag_with_lines):
+        start = tuple(segment[0][0])
+        end = tuple(segment[0][-1])
+        segment_map[(start, end)].append(idx)
+        # segment_map[(end, start)].append(idx)  # Include reverse for undirected graph
+
+    # Create a mapping for nodes to 1-based indices
+    nodes = set()
+    for start, end in segment_map:
+        nodes.add(start)
+        nodes.add(end)
+
+    node_list = list(nodes)
+    node_index = {node: idx for idx, node in enumerate(node_list)}  # 1-based index
+
+    # Prepare the graph representation
+    N = len(node_list)  # Number of nodes
+    graph = [[] for _ in range(N)]  # 1-based indexing
+
+    for (start, end), indices in segment_map.items():
+        u = node_index[start]
+        v = node_index[end]
+        graph[u].append(v)
+        graph[v].append(u)
+
+    cycles = find_cycles_in_graph(graph, N)
+    # Print all cycle combinations
+    cycle_combinations = find_all_cycle_combinations(cycles, segment_map, N, node_list)
+
+    final_coordinates = seperate_cycles(cycle_combinations,merged_frag_with_lines, is_straight_line)
+    # print(final_coordinates)
+    for i in range(0, len(final_coordinates)):
+        final_shape = final_coordinates[i]
         zeros_column = np.zeros((len(final_shape), 1), dtype=np.float64)
-        integers_column = np.full((len(final_shape), 1), float(shape_num), dtype=np.float64)
-        shape_num += 1
+        integers_column = np.full((len(final_shape), 1), float(i), dtype=np.float64)
         stacked_array = np.hstack((integers_column, zeros_column, np.array(final_shape, dtype=np.float64)))
         outputfile = np.vstack((outputfile, stacked_array), dtype=np.float64)
         
+
 
 csv_file_path = 'output\\outputfile.csv'  
 np.savetxt(csv_file_path, outputfile, delimiter=',', fmt='%f', comments='')
 
 print(Fore.RED, f"Output file saved as {csv_file_path}")
 print(Style.RESET_ALL)
+
+#plotting the input image
+plot(read_csv(path), "Input Figure")
 
 # plotting the final output
 plot(read_csv(csv_file_path), "Output Figure")
