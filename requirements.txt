@@ -1,0 +1,7 @@
+cairosvg
+colorama
+matplotlib
+numpy
+pandas
+scikit-learn
+svgwrite
