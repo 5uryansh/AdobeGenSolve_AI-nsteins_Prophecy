@@ -34,10 +34,11 @@ path = args.path
 
 outputfile = np.empty((0, 4), dtype=np.float64)
 shape_num = 0
+print(Fore.YELLOW, "Reading the input file....")
+print(Style.RESET_ALL)
 
 if task=='regularisation':
     paths_XYs = read_csv(path)
-    plot(paths_XYs)
     final_shapes = []
     for XYs in paths_XYs:
         for XY in XYs:
@@ -81,6 +82,39 @@ if task=='regularisation':
                 x = value[2]
                 y = value[3]
                 
+            ## printing symmetry lines
+            # calculating the centroid
+            centroid_x, centroid_y = np.mean(x), np.mean(y)
+            
+            # generating the variable theta for finding best angle of symmetry
+            angles = np.linspace(0, np.pi, 180)
+            
+            # finding symmetry axis
+            best_axis = None
+            best_score = np.inf
+            
+            for theta in angles:
+                m = np.tan(theta)
+                c = centroid_y - m*centroid_x
+                
+                # reflecting the curve for comparison
+                x_reflected, y_reflected = reflect_curve(x, y, m, c)
+                
+                score = calculate_symmetry_score(x, y, x_reflected, y_reflected)
+                if score < best_score:
+                    best_score = score
+                    best_axis = (m, c)
+            
+            m, c = best_axis
+            print(Fore.BLUE, f"The symmetry line 'y=m*x+c' has m as {m} and c as {c}")
+            if(abs(m)>=0 and abs(m)<0.577):
+                print("Horizontal line of symmetry.")
+            if(abs(m)>=0.577 and abs(m)<1.732):
+                print("Diagonal line of symmetry.")
+            if(abs(m)>=1.732):
+                print("Vertical line of symmetry.")
+            print(Style.RESET_ALL)
+            
             # appending the values in final_shapes    
             final_shape = np.column_stack((x, y))
             final_shapes.append([final_shape])
@@ -92,13 +126,10 @@ if task=='regularisation':
         stacked_array = np.hstack((integers_column, zeros_column, np.array(final_shape, dtype=np.float64)))
         outputfile = np.vstack((outputfile, stacked_array), dtype=np.float64)
 
-    # plotting the graph
-    plot(final_shapes)  
     
     
 if task == 'occlusion':
     paths_XYs = read_csv(path)
-    plot(paths_XYs)
     final_shapes = []
     for XYs in paths_XYs:
         for XY in XYs:
@@ -138,6 +169,14 @@ if task == 'occlusion':
             '''
             # shifting the line
             m, c = shift_symmetry_line(x, y, m, c)
+            print(Fore.BLUE, f"The symmetry line 'y=m*x+c' has m as {m} and c as {c}")
+            if(abs(m)>=0 and abs(m)<0.577):
+                print("Horizontal line of symmetry.")
+            if(abs(m)>=0.577 and abs(m)<1.732):
+                print("Diagonal line of symmetry.")
+            if(abs(m)>=1.732):
+                print("Vertical line of symmetry.")
+            print(Style.RESET_ALL)
             
             # Divide the points into left and right based on the symmetry line
             left_side = []
@@ -178,16 +217,17 @@ if task == 'occlusion':
         shape_num += 1
         stacked_array = np.hstack((integers_column, zeros_column, np.array(final_shape, dtype=np.float64)))
         outputfile = np.vstack((outputfile, stacked_array), dtype=np.float64)
-    # plotting the graph
-    plot(final_shapes)
-
-    
-
-    from evaluation import polylines2svg
-    polylines2svg(final_shapes, "output.svg")
+        
 
 csv_file_path = 'output\\outputfile.csv'  
 np.savetxt(csv_file_path, outputfile, delimiter=',', fmt='%f', comments='')
 
 print(Fore.RED, f"Output file saved as {csv_file_path}")
 print(Style.RESET_ALL)
+
+# plotting the final output
+plot(read_csv(csv_file_path))
+
+if task == 'occlusion':
+    from evaluation import polylines2svg
+    polylines2svg(final_shapes, "output.svg")
