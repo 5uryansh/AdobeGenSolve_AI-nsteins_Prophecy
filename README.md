@@ -44,3 +44,6 @@ Developed by:
 - Suryansh Srivastava
 - Piyush Ojha
 - Umesh Chavda
+
+
+/testcases/isolatedinput.jpg
