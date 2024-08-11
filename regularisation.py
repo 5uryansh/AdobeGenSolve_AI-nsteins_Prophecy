@@ -19,7 +19,7 @@ def read_csv(csv_path):
     return path_XYs
 
 
-def plot(paths_XYs):
+def plot(paths_XYs, title_for_graph):
     fig, ax = plt.subplots(tight_layout=True, figsize=(8, 8))
     colours = ['r', 'g', 'b', 'y', 'c', 'm', 'k']
     for i, XYs in enumerate(paths_XYs):
@@ -27,6 +27,7 @@ def plot(paths_XYs):
         for XY in XYs:
             ax.plot(XY[:, 0], XY[:, 1], c=c, linewidth=2)
     ax.set_aspect('equal')
+    plt.title(title_for_graph)
     plt.show()
     
 

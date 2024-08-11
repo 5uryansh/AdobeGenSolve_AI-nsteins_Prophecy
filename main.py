@@ -39,6 +39,7 @@ print(Style.RESET_ALL)
 
 if task=='regularisation':
     paths_XYs = read_csv(path)
+    plot(paths_XYs, "Original Figure")
     final_shapes = []
     for XYs in paths_XYs:
         for XY in XYs:
@@ -130,6 +131,8 @@ if task=='regularisation':
     
 if task == 'occlusion':
     paths_XYs = read_csv(path)
+    paths_XYs = read_csv(path)
+    plot(paths_XYs, "original")
     final_shapes = []
     for XYs in paths_XYs:
         for XY in XYs:
@@ -226,7 +229,7 @@ print(Fore.RED, f"Output file saved as {csv_file_path}")
 print(Style.RESET_ALL)
 
 # plotting the final output
-plot(read_csv(csv_file_path))
+plot(read_csv(csv_file_path), "Output Figure")
 
 if task == 'occlusion':
     from evaluation import polylines2svg
