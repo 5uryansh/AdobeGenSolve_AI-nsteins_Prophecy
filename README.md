@@ -39,6 +39,11 @@ python main.py --task occlusion --path dataset\occlusion1.csv
 #### Step 3
 The resulting file is in `.csv` format stored at `output\outputfile.csv`.
 
+Running Testcases:
+<img src="(https://github.com/user-attachments/assets/383e7ffb-60c8-42ed-bd02-3bc31e8e1890)" alt="drawing" width="200"/>
+![isolatedinput](https://github.com/user-attachments/assets/383e7ffb-60c8-42ed-bd02-3bc31e8e1890)
+![isolatedoutput](https://github.com/user-attachments/assets/0031bbf3-0dc1-49a7-a87a-f82a5e08596e)
+
 
 Developed by:
 - Suryansh Srivastava
@@ -46,4 +51,3 @@ Developed by:
 - Umesh Chavda
 
 
-/testcases/isolatedinput.jpg
